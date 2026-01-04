@@ -5,6 +5,7 @@ import {
     PointerSensor,
     useSensor,
     useSensors,
+    TouchSensor,
     closestCorners,
 } from '@dnd-kit/core'
 import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core'
@@ -43,6 +44,12 @@ export function KanbanBoard({ tasks, columns, onTaskUpdate, onTaskClick, onCreat
         useSensor(PointerSensor, {
             activationConstraint: {
                 distance: 8,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 250,
+                tolerance: 5,
             },
         })
     )

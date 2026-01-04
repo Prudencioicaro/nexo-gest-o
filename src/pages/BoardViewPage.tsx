@@ -259,8 +259,12 @@ export function BoardViewPage({ board }: BoardViewPageProps) {
                                                 </div>
                                             </th>
                                         ))}
-                                        <th className="w-10 border-r border-[#2f2f2f] hover:bg-[#2c2c2c] cursor-pointer" onClick={() => setIsAddingColumn(true)}>
-                                            <Plus size={14} className="text-[#8b8b8b] mx-auto" />
+                                        <th className="w-10 md:w-16 min-w-[60px] border-r border-[#2f2f2f] hover:bg-[#2c2c2c] cursor-pointer transition-colors p-0" onClick={() => setIsAddingColumn(true)}>
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <div className="w-8 h-8 rounded-lg bg-[#2c2c2c]/50 flex items-center justify-center hover:bg-[#2c2c2c] hover:text-white transition-all">
+                                                    <Plus size={18} className="text-[#8b8b8b]" />
+                                                </div>
+                                            </div>
                                         </th>
                                         <th className="bg-[#191919] flex-1"></th>
                                     </tr>

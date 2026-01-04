@@ -3,26 +3,48 @@
 @tailwind utilities;
 
 :root {
-  /* Google AI Dark Theme Base */
-  --background: #0b0c0e;
-  /* Deep Charcoal */
-  --foreground: #e3e3e3;
-  /* Soft White */
+  /* Google AI Dark Theme Base (HSL Converted for Tailwind) */
+  --background: 220 12% 5%;
+  /* #0b0c0e */
+  --foreground: 0 0% 89%;
+  /* #e3e3e3 */
 
-  --card: #1e1e20;
-  --card-hover: #2a2a2c;
-  --border: #303030;
+  --card: 240 3% 12%;
+  /* #1e1e20 */
+  --card-foreground: 0 0% 89%;
+  --card-hover: 240 2% 17%;
+  /* #2a2a2c */
 
-  --primary: #4285F4;
-  /* Google Blue */
-  --primary-hover: #1a73e8;
+  --popover: 220 12% 5%;
+  --popover-foreground: 0 0% 89%;
 
-  --gemini-start: #4285F4;
-  --gemini-middle: #9B72CB;
-  --gemini-end: #D96570;
+  --primary: 217 89% 61%;
+  /* #4285F4 */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 240 3% 12%;
+  --secondary-foreground: 0 0% 89%;
+
+  --muted: 240 3% 16%;
+  --muted-foreground: 215 20% 65%;
+
+  --accent: 217 89% 61%;
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 0 0% 19%;
+  /* #303030 */
+  --input: 0 0% 19%;
+  --ring: 217 89% 61%;
 
   --radius: 1.5rem;
-  /* More rounded */
+
+  /* Custom Gradients Helper */
+  --camera-start: #4285F4;
+  --camera-middle: #9B72CB;
+  --camera-end: #D96570;
 }
 
 * {
