@@ -3,40 +3,26 @@
 @tailwind utilities;
 
 :root {
-  --background: 222 47% 4%;
-  /* Obsidian Dark */
-  --foreground: 210 40% 98%;
-  --card: 222 47% 7%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222 47% 5%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 263 70% 50%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 217 32% 14%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217 32% 12%;
-  --muted-foreground: 215 20% 65%;
-  --accent: 217 32% 15%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 63% 31%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217 32% 16%;
-  --input: 217 32% 12%;
-  --ring: 263 70% 50%;
-  --radius: 0.75rem;
+  /* Google AI Dark Theme Base */
+  --background: #0b0c0e;
+  /* Deep Charcoal */
+  --foreground: #e3e3e3;
+  /* Soft White */
 
-  /* Notion-specific colors */
-  --background: #191919;
-  --foreground: #ffffff;
-  --secondary: #252525;
-  --accent: #2383e2;
-  --border: #2f2f2f;
-  --surface: #191919;
-  --muted: #8b8b8b;
-  --hover: #2c2c2c;
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
+  --card: #1e1e20;
+  --card-hover: #2a2a2c;
+  --border: #303030;
+
+  --primary: #4285F4;
+  /* Google Blue */
+  --primary-hover: #1a73e8;
+
+  --gemini-start: #4285F4;
+  --gemini-middle: #9B72CB;
+  --gemini-end: #D96570;
+
+  --radius: 1.5rem;
+  /* More rounded */
 }
 
 * {
@@ -46,18 +32,28 @@
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  letter-spacing: -0.011em;
+  font-family: 'Google Sans', 'Inter', -apple-system, sans-serif;
+  /* Aspiring to Google Sans */
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-.glass {
-  background: rgba(13, 17, 23, 0.7);
+/* Gemini Gradient Text Utility */
+.text-gradient-gemini {
+  background: linear-gradient(90deg, #4285F4 0%, #9B72CB 50%, #D96570 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+/* Glassmorphism Refined */
+.glass-panel {
+  background: rgba(30, 30, 32, 0.6);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(48, 54, 61, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius);
 }
 
