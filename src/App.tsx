@@ -33,7 +33,7 @@ function App() {
       setUser(session?.user ?? null)
 
       // Artificial delay to show the NEXO loader
-      await new Promise(resolve => setTimeout(resolve, 2500))
+      await new Promise(resolve => setTimeout(resolve, 3000))
       useAuthStore.setState({ loading: false })
     }
 
@@ -76,7 +76,7 @@ function App() {
 
           <div className="flex flex-col items-center gap-2">
             <div className="h-1 w-48 bg-white/5 rounded-full overflow-hidden relative">
-              <div className="absolute inset-0 bg-[#2383e2] animate-[loading_2s_ease-in-out_infinite]" style={{ width: '40%' }} />
+              <div className="h-full bg-[#2383e2] animate-[progress_3s_ease-out_forwards]" />
             </div>
             <p className="text-[10px] font-bold text-white/20 uppercase tracking-[4px] animate-pulse">
               Iniciando Nexo
@@ -85,10 +85,9 @@ function App() {
         </div>
 
         <style>{`
-          @keyframes loading {
-            0% { transform: translateX(-100%) scaleX(0.5); }
-            50% { transform: translateX(50%) scaleX(1.5); }
-            100% { transform: translateX(200%) scaleX(0.5); }
+          @keyframes progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
           }
         `}</style>
       </div>
