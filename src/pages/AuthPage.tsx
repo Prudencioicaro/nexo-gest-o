@@ -42,7 +42,18 @@ export function AuthPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-black">
+            {/* 3D Rotating Void Background */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200vmax] h-[200vmax] bg-[conic-gradient(from_0deg_at_50%_50%,#000000_0%,#1a1a1a_40%,#000000_60%,#1a1a1a_90%,#000000_100%)] opacity-40 animate-[spin_60s_linear_infinite]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000000_80%)]" />
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay" />
+            </div>
+
+            {/* Floating Orbs */}
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#2383e2]/20 blur-[120px] rounded-full animate-pulse pointer-events-none mix-blend-screen" />
+            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-purple-500/10 blur-[100px] rounded-full animate-pulse delay-1000 pointer-events-none mix-blend-screen" />
+
             {loading && (
                 <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#121212] animate-in fade-in duration-500">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#2383e2]/10 blur-[120px] rounded-full animate-pulse" />
@@ -80,7 +91,7 @@ export function AuthPage() {
                 </div>
             )}
 
-            <div className="glass w-full max-w-md p-8 shadow-2xl relative z-10">
+            <div className="glass-panel w-full max-w-[400px] p-8 md:p-10 shadow-2xl relative z-10 backdrop-blur-2xl bg-black/40 border border-white/10 rounded-3xl animate-in fade-in zoom-in-95 duration-500">
                 <div className="text-center mb-8">
                     <div className="flex justify-center mb-6">
                         <img src="/logo.png" alt="NEXO" className="h-20 w-auto brightness-200" />

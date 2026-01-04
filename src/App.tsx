@@ -5,6 +5,7 @@ import { useBoardStore } from './store/useBoardStore'
 import { AuthPage } from './pages/AuthPage'
 import { CreateBoardModal } from './components/modals/CreateBoardModal'
 import { ShareBoardModal } from './components/modals/ShareBoardModal'
+import { LandingPage } from './pages/LandingPage'
 import { BoardViewPage } from './pages/BoardViewPage'
 import {
   LogOut,
@@ -26,6 +27,7 @@ function App() {
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [showLanding, setShowLanding] = useState(true)
 
   useEffect(() => {
     const initAuth = async () => {
@@ -95,6 +97,9 @@ function App() {
   }
 
   if (!user) {
+    if (showLanding) {
+      return <LandingPage onAuth={() => setShowLanding(false)} />
+    }
     return <AuthPage />
   }
 
