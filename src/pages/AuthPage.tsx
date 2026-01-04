@@ -145,7 +145,7 @@ export function AuthPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="btn-primary w-full py-2 font-bold mt-4"
+                        className="btn-primary w-full py-2 font-bold mt-4 flex items-center justify-center"
                     >
                         {loading ? 'Carregando...' : isLogin ? 'Entrar' : 'Cadastrar'}
                     </button>
