@@ -27,8 +27,8 @@ export function CreateBoardModal({ onClose }: CreateBoardModalProps) {
     }
 
     return (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-            <div className="bg-[#191919] border border-[#2f2f2f] w-full max-w-lg rounded-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center md:items-center p-0 md:p-4 z-50 animate-in fade-in duration-200">
+            <div className="bg-[#191919] border-t border-x md:border border-[#2f2f2f] w-full md:w-full md:max-w-lg rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300 md:duration-200 md:zoom-in-95">
                 <div className="px-6 py-4 flex items-center justify-between border-b border-[#2f2f2f]">
                     <h2 className="text-sm font-bold text-[#8b8b8b] uppercase tracking-wider">Criar Novo Quadro</h2>
                     <button onClick={onClose} className="text-[#8b8b8b] hover:text-white transition-colors">

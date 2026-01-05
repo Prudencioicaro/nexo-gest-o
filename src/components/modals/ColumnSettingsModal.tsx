@@ -40,8 +40,8 @@ export function ColumnSettingsModal({ column, onClose, onUpdate, onDelete }: Col
     }
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[120] p-4">
-            <div className="bg-[#202020] border border-[#2f2f2f] w-full max-w-sm rounded-xl shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center md:items-center z-[120] p-0 md:p-4">
+            <div className="bg-[#202020] border-t border-x md:border border-[#2f2f2f] w-full md:w-full md:max-w-sm rounded-t-2xl md:rounded-xl shadow-2xl animate-in slide-in-from-bottom duration-300 md:duration-200 md:zoom-in-95">
                 <div className="flex items-center justify-between p-4 border-b border-[#2f2f2f]">
                     <h2 className="text-xs font-bold text-[#8b8b8b] uppercase tracking-widest flex items-center gap-2">
                         <Settings2 size={14} />

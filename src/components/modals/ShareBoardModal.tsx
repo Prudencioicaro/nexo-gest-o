@@ -42,9 +42,9 @@ export function ShareBoardModal({ board, onClose }: ShareBoardModalProps) {
     }
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] flex items-center justify-center p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] flex items-end justify-center md:items-center p-0 md:p-4 animate-in fade-in duration-300">
             <div
-                className="bg-[#1c1c1c] border border-white/5 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300"
+                className="bg-[#1c1c1c] border-t border-x md:border border-white/5 w-full md:w-full md:max-w-md rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300 md:duration-300 md:zoom-in-95"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
