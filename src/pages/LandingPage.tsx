@@ -8,7 +8,7 @@ interface LandingPageProps {
 
 export function LandingPage({ onAuth }: LandingPageProps) {
     return (
-        <div className="min-h-screen text-[#e3e3e3] selection:bg-[#4285F4]/30 selection:text-white overflow-x-hidden">
+        <div className="min-h-screen bg-[#0b0c0e] text-[#e3e3e3] selection:bg-[#4285F4]/30 selection:text-white overflow-x-hidden">
 
             {/* Navbar */}
             <nav className="fixed top-0 w-full z-50 bg-[#0b0c0e]/80 backdrop-blur-xl border-b border-white/5">

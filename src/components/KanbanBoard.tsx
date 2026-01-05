@@ -245,10 +245,15 @@ function SortableTaskCard({ task, onClick, columns, index }: { task: Task; onCli
             ref={setNodeRef}
             {...attributes}
             {...listeners}
-            className={`group/card p-4 bg-[#1c1c1c] border border-white/5 rounded-xl shadow-sm hover:border-white/20 hover:bg-[#202020] transition-all duration-200 animate-in fade-in slide-in-from-top-1 ease-out overflow-hidden relative cursor-grab active:cursor-grabbing`}
+            className={`group/card p-4 bg-[#1c1c1c] border border-white/5 rounded-xl shadow-sm hover:border-white/20 hover:bg-[#202020] transition-all duration-200 animate-in fade-in slide-in-from-top-1 ease-out overflow-hidden relative cursor-grab active:cursor-grabbing touch-none`}
             style={{ ...style, animationDelay: `${index * 50}ms` }}
         >
-            <div className="flex-1 min-w-0" onClick={onClick}>
+            <div className="flex-1 min-w-0" onClick={(e) => {
+                // Prevent click if it was a drag gesture
+                if (!isDragging) {
+                    onClick();
+                }
+            }}>
                 <div className="flex items-center gap-2 mb-2 opacity-30">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#2383e2]" />
                     <span className="text-[9px] font-bold uppercase tracking-widest">Tarefa</span>
