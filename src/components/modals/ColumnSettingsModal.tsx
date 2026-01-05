@@ -29,12 +29,18 @@ export function ColumnSettingsModal({ column, onClose, onUpdate, onDelete }: Col
     const [name, setName] = useState(column.name)
     const [type, setType] = useState<ColumnType>(column.type)
     const [numberFormat, setNumberFormat] = useState(column.options?.numberFormat || 'number')
+    const [statusOptions, setStatusOptions] = useState<any[]>(column.options?.options || [])
+
+    const getColorHex = (color: string) => {
+        const colors: any = { Gray: '#9b9b9b', Blue: '#5e87c9', Yellow: '#c29243', Green: '#529e72', Red: '#df5452', Orange: '#cc7d24', Purple: '#9d68d3', Pink: '#d15796' }
+        return colors[color] || '#373737'
+    }
 
     const handleSave = () => {
         onUpdate(column.id, {
             name,
             type,
-            options: { ...column.options, numberFormat }
+            options: { ...column.options, numberFormat, options: statusOptions }
         })
         onClose()
     }
@@ -86,6 +92,42 @@ export function ColumnSettingsModal({ column, onClose, onUpdate, onDelete }: Col
                             >
                                 {NUMBER_FORMATS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
                             </select>
+                        </div>
+                    )}
+
+                    {type === 'status' && (
+                        <div className="space-y-4 pt-2 border-t border-[#2f2f2f]">
+                            <label className="text-[10px] font-bold text-[#8b8b8b] uppercase">Opções de Status</label>
+                            <div className="space-y-2">
+                                {statusOptions.map((opt: any, idx: number) => (
+                                    <div key={idx} className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: getColorHex(opt.color) }} />
+                                        <input
+                                            className="flex-1 bg-[#191919] border border-[#2f2f2f] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-[#2383e2]"
+                                            value={opt.label}
+                                            onChange={(e) => {
+                                                const newOptions = [...statusOptions]
+                                                newOptions[idx].label = e.target.value
+                                                newOptions[idx].id = e.target.value // simple id sync
+                                                setStatusOptions(newOptions)
+                                            }}
+                                        />
+                                        <button
+                                            onClick={() => setStatusOptions(statusOptions.filter((_: any, i: number) => i !== idx))}
+                                            className="p-1 text-[#8b8b8b] hover:text-red-400"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                ))}
+                                <button
+                                    onClick={() => setStatusOptions([...statusOptions, { id: `new_${Date.now()}`, label: 'Nova Opção', color: 'Gray' }])}
+                                    className="flex items-center gap-2 text-xs text-[#2383e2] hover:text-[#2a8ff5] font-medium mt-2"
+                                >
+                                    <List size={14} />
+                                    Adicionar Opção
+                                </button>
+                            </div>
                         </div>
                     )}
 

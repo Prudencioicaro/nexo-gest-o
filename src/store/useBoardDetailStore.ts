@@ -95,9 +95,22 @@ export const useBoardDetailStore = create<BoardDetailState>((set, get) => ({
 
     addColumn: async (boardId, name, type) => {
         const newPos = get().columns.length
+        let options = {}
+        if (type === 'status') {
+            options = {
+                options: [
+                    { id: 'backlog', label: 'Backlog', color: 'Gray' },
+                    { id: 'todo', label: 'A Fazer', color: 'Blue' },
+                    { id: 'in_progress', label: 'Em Andamento', color: 'Yellow' },
+                    { id: 'done', label: 'Concluído', color: 'Green' },
+                    { id: 'blocked', label: 'Bloqueado', color: 'Red' },
+                ]
+            }
+        }
+
         const { data } = await supabase
             .from('board_columns')
-            .insert([{ board_id: boardId, name, type, position: newPos }])
+            .insert([{ board_id: boardId, name, type, position: newPos, options }])
             .select()
             .single()
 

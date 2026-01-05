@@ -43,7 +43,8 @@ export function BoardViewPage({ board }: BoardViewPageProps) {
         addColumn,
         updateTask,
         updateColumn,
-        deleteColumn
+        deleteColumn,
+        members
     } = useBoardDetailStore()
 
     const [activeTab, setActiveTab] = useState<'geral' | 'kanban' | 'stats' | 'calendar'>('geral')
@@ -321,6 +322,19 @@ export function BoardViewPage({ board }: BoardViewPageProps) {
                                                                 {task.data_json?.[col.id] && <Check size={12} className="text-white" />}
                                                             </button>
                                                         </div>
+                                                    ) : col.type === 'person' ? (
+                                                        <select
+                                                            className="bg-transparent border-none outline-none w-full h-full px-4 text-white appearance-none cursor-pointer hover:bg-[#2c2c2c]/50 transition-colors"
+                                                            value={task.data_json?.[col.id] || ''}
+                                                            onChange={(e) => handleColumnUpdate(task.id, col.id, e.target.value)}
+                                                        >
+                                                            <option value="" className="bg-[#191919]">Ninguém</option>
+                                                            {members.map((m: any) => (
+                                                                <option key={m.id} value={m.profiles?.email} className="bg-[#191919]">
+                                                                    {m.profiles?.email}
+                                                                </option>
+                                                            ))}
+                                                        </select>
                                                     ) : (
                                                         <div className="relative w-full h-full group/cell">
                                                             <input
