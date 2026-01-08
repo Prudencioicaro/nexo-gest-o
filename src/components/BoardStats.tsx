@@ -3,13 +3,13 @@ import type { Task, BoardColumn } from '../types'
 import {
     BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts'
-import { Plus, Trash2, ChartBar, ChartPie, Settings2 } from 'lucide-react'
+import { Plus, Trash2, ChartBar, ChartPie, Settings2, Hash } from 'lucide-react'
 
 interface ChartConfig {
     id: string
     title: string
-    categoryColumnId: string // Eixo X ou Categorias da Pizza
-    valueColumnId: string    // Eixo Y ou Tamanho da fatia (Contagem ou Soma)
+    categoryColumnId: string
+    valueColumnId: string
     type: 'bar' | 'pie'
 }
 
@@ -23,7 +23,7 @@ export function BoardStats({ tasks, columns }: BoardStatsProps) {
         {
             id: 'default',
             title: 'Distribuição por Status',
-            categoryColumnId: columns.find(c => c.type === 'status')?.id || columns[0]?.id || '',
+            categoryColumnId: columns.find(c => c.type === 'status')?.id || columns[1]?.id || '',
             valueColumnId: 'count',
             type: 'bar'
         }
@@ -32,41 +32,39 @@ export function BoardStats({ tasks, columns }: BoardStatsProps) {
     const addChart = () => {
         const newChart: ChartConfig = {
             id: crypto.randomUUID(),
-            title: 'Novo Gráfico',
-            categoryColumnId: columns.find(c => c.type === 'status')?.id || columns[0]?.id || '',
+            title: 'Análise de Dados',
+            categoryColumnId: columns.find(c => c.type === 'status')?.id || columns[1]?.id || '',
             valueColumnId: 'count',
             type: 'bar'
         }
         setCharts([...charts, newChart])
     }
 
-    const removeChart = (id: string) => {
-        setCharts(charts.filter(c => c.id !== id))
-    }
-
+    const removeChart = (id: string) => setCharts(charts.filter(c => c.id !== id))
     const updateChart = (id: string, updates: Partial<ChartConfig>) => {
         setCharts(charts.map(c => c.id === id ? { ...c, ...updates } : c))
     }
 
-    const NOTION_COLORS = ['#2383e2', '#529e72', '#df5452', '#cc7d24', '#9d68d3', '#d15796', '#5e87c9']
+    // Modern Premium Palette
+    const CHART_COLORS = ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899']
 
     return (
-        <div className="p-12 space-y-12 pb-32">
+        <div className="p-10 space-y-12 pb-32 no-scrollbar">
             <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold text-white mb-1">Estatísticas do Projeto</h2>
-                    <p className="text-sm text-[#8b8b8b]">Relacione colunas para gerar insights visuais.</p>
+                <div className="space-y-1">
+                    <h2 className="text-3xl font-semibold text-white tracking-tight">Estatísticas</h2>
+                    <p className="text-sm text-white/30 font-medium">Insights visuais baseados nas propriedades do seu projeto.</p>
                 </div>
                 <button
                     onClick={addChart}
-                    className="bg-[#2383e2] hover:bg-[#2a8ff5] text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-[#2383e2]/20"
+                    className="bg-white text-black hover:bg-neutral-200 px-6 py-2.5 rounded-full font-bold text-xs flex items-center gap-2 transition-luxury shadow-xl active:scale-95"
                 >
-                    <Plus size={18} />
-                    <span>ADICIONAR GRÁFICO</span>
+                    <Plus size={16} />
+                    <span>ADICIONAR INSIGHT</span>
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
                 {charts.map(chart => (
                     <ChartCard
                         key={chart.id}
@@ -75,14 +73,14 @@ export function BoardStats({ tasks, columns }: BoardStatsProps) {
                         columns={columns}
                         onUpdate={(u: any) => updateChart(chart.id, u)}
                         onRemove={() => removeChart(chart.id)}
-                        colors={NOTION_COLORS}
+                        colors={CHART_COLORS}
                     />
                 ))}
 
                 {charts.length === 0 && (
-                    <div className="col-span-full py-20 border-2 border-dashed border-[#2f2f2f] rounded-2xl flex flex-col items-center justify-center text-[#8b8b8b]">
-                        <Settings2 size={48} className="mb-4 opacity-20" />
-                        <p>Nenhum gráfico configurado. Clique em adicionar para começar.</p>
+                    <div className="col-span-full py-32 border-2 border-dashed border-white/[0.05] rounded-[32px] flex flex-col items-center justify-center text-white/20 bg-white/[0.01]">
+                        <Settings2 size={48} className="mb-4 opacity-10" />
+                        <p className="font-medium tracking-tight">Nenhum insight configurado.</p>
                     </div>
                 )}
             </div>
@@ -94,20 +92,16 @@ function ChartCard({ chart, tasks, columns, onUpdate, onRemove, colors }: any) {
     const data = useMemo(() => {
         const catCol = columns.find((c: any) => c.id === chart.categoryColumnId)
         if (!catCol) return []
-
         const valCol = columns.find((c: any) => c.id === chart.valueColumnId)
-
         const groups: Record<string, number> = {}
         let total = 0
 
         tasks.forEach((t: any) => {
             const catVal = t.data_json?.[catCol.id] || '(Sem valor)'
-
             let amount = 1
             if (valCol && valCol.type === 'number') {
                 amount = parseFloat(t.data_json?.[valCol.id]) || 0
             }
-
             groups[catVal] = (groups[catVal] || 0) + amount
             total += amount
         })
@@ -121,91 +115,102 @@ function ChartCard({ chart, tasks, columns, onUpdate, onRemove, colors }: any) {
 
     const formatNumber = (value: any) => {
         const valCol = columns.find((c: any) => c.id === chart.valueColumnId)
-        if (valCol?.options?.numberFormat === 'currency_brl') {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+        if (!valCol || valCol.type !== 'number') return value.toLocaleString('pt-BR')
+
+        const format = valCol.options?.numberFormat
+        switch (format) {
+            case 'currency_brl':
+                return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+            case 'currency_usd':
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
+            case 'decimal':
+                return new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)
+            default:
+                return value.toLocaleString('pt-BR')
         }
-        if (valCol?.options?.numberFormat === 'currency_usd') {
-            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
-        }
-        return value.toLocaleString('pt-BR')
     }
 
     return (
-        <div className="bg-[#202020] border border-[#2f2f2f] rounded-2xl p-6 hover:border-[#2383e2]/30 hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-all duration-300 flex flex-col h-[450px] group/chart">
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex-1 mr-4">
+        <div className="bg-[#0f0f11] border border-white/[0.04] rounded-[28px] p-8 flex flex-col h-[500px] transition-luxury hover:bg-[#141416] hover:border-white/[0.1] group/chart">
+            <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3 grow">
+                    <div className="w-10 h-10 rounded-xl bg-white/[0.03] flex items-center justify-center text-white/20">
+                        <Hash size={20} />
+                    </div>
                     <input
-                        className="bg-transparent border-none outline-none text-lg font-bold text-white w-full hover:bg-[#2c2c2c] rounded px-2 -ml-2"
+                        className="bg-transparent border-none outline-none text-xl font-semibold text-white/90 w-full hover:bg-white/[0.03] rounded-lg px-2 -ml-2 transition-luxury"
                         value={chart.title}
                         onChange={(e) => onUpdate({ title: e.target.value })}
                     />
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5 p-1 bg-white/[0.03] rounded-lg">
                     <button
                         onClick={() => onUpdate({ type: chart.type === 'bar' ? 'pie' : 'bar' })}
-                        className={`p-1.5 rounded transition-colors ${chart.type === 'pie' ? 'bg-[#2383e2] text-white' : 'hover:bg-[#2c2c2c] text-[#8b8b8b]'}`}
+                        className={`p-2 rounded-md transition-luxury ${chart.type === 'pie' ? 'bg-white/10 text-white shadow-sm' : 'hover:bg-white/5 text-white/20'}`}
                     >
                         {chart.type === 'bar' ? <ChartPie size={16} /> : <ChartBar size={16} />}
                     </button>
-                    <button onClick={onRemove} className="p-1.5 hover:bg-red-400/10 rounded text-[#8b8b8b] hover:text-red-400 transition-colors">
+                    <button onClick={onRemove} className="p-2 text-white/10 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-luxury">
                         <Trash2 size={16} />
                     </button>
                 </div>
             </div>
 
-            <div className="flex items-center gap-4 mb-6 p-3 bg-[#191919] rounded-lg border border-[#2f2f2f]">
-                <div className="flex flex-col gap-1 grow">
-                    <label className="text-[9px] font-bold text-[#8b8b8b] uppercase px-1">Agrupar por</label>
+            <div className="flex items-center gap-6 mb-8 p-4 bg-white/[0.02] rounded-2xl border border-white/[0.03]">
+                <div className="flex flex-col gap-1.5 grow">
+                    <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-1">Agrupar</label>
                     <select
-                        className="bg-transparent border-none outline-none text-[11px] text-white cursor-pointer px-1"
+                        className="bg-transparent border-none outline-none text-xs text-white/70 cursor-pointer font-medium"
                         value={chart.categoryColumnId}
                         onChange={(e) => onUpdate({ categoryColumnId: e.target.value })}
                     >
-                        {columns.map((c: any) => <option key={c.id} value={c.id} className="bg-[#191919]">{c.name}</option>)}
+                        {columns.map((c: any) => <option key={c.id} value={c.id} className="bg-[#0f0f11]">{c.name}</option>)}
                     </select>
                 </div>
-
-                <div className="w-[1px] h-8 bg-[#2f2f2f]" />
-
-                <div className="flex flex-col gap-1 grow">
-                    <label className="text-[9px] font-bold text-[#8b8b8b] uppercase px-1">Valor de</label>
+                <div className="w-[1px] h-8 bg-white/5" />
+                <div className="flex flex-col gap-1.5 grow">
+                    <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-1">Valor</label>
                     <select
-                        className="bg-transparent border-none outline-none text-[11px] text-white cursor-pointer px-1"
+                        className="bg-transparent border-none outline-none text-xs text-white/70 cursor-pointer font-medium"
                         value={chart.valueColumnId}
                         onChange={(e) => onUpdate({ valueColumnId: e.target.value })}
                     >
-                        <option value="count" className="bg-[#191919]">Contagem total</option>
+                        <option value="count" className="bg-[#0f0f11]">Total de itens</option>
                         {columns.filter((c: any) => c.type === 'number').map((c: any) => (
-                            <option key={c.id} value={c.id} className="bg-[#191919]">Soma de {c.name}</option>
+                            <option key={c.id} value={c.id} className="bg-[#0f0f11]">Soma de {c.name}</option>
                         ))}
                     </select>
                 </div>
             </div>
 
-            <div className="flex-1 min-h-0 w-full font-sans">
+            <div className="flex-1 min-h-0 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     {chart.type === 'bar' ? (
                         <BarChart data={data}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#2f2f2f" vertical={false} />
-                            <XAxis dataKey="name" stroke="#8b8b8b" fontSize={11} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#8b8b8b" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => val > 1000 ? (val / 1000).toFixed(1) + 'k' : val} />
+                            <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                            <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" fontSize={10} tickLine={false} axisLine={false} dy={10} />
+                            <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} tickLine={false} axisLine={false} dx={-10} />
                             <Tooltip
+                                cursor={{ fill: 'rgba(255,255,255,0.02)' }}
                                 content={({ active, payload }: any) => {
                                     if (active && payload && payload.length) {
                                         return (
-                                            <div className="bg-[#202020] border border-[#2f2f2f] p-3 rounded-lg shadow-xl">
-                                                <p className="text-xs font-bold text-white mb-1">{payload[0].name}</p>
-                                                <p className="text-[11px] text-[#2383e2] font-medium">Total: {formatNumber(payload[0].value)}</p>
-                                                <p className="text-[11px] text-[#8b8b8b]">Representação: {payload[0].payload.percentage}</p>
+                                            <div className="glass-surface p-4 rounded-2xl shadow-luxury border border-white/[0.05]">
+                                                <p className="text-xs font-semibold text-white mb-2">{payload[0].name}</p>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: payload[0].fill }} />
+                                                    <p className="text-sm font-bold text-white">{formatNumber(payload[0].value)}</p>
+                                                </div>
+                                                <p className="text-[10px] text-white/30 mt-1 uppercase font-bold tracking-wider">{payload[0].payload.percentage} do total</p>
                                             </div>
                                         )
                                     }
                                     return null
                                 }}
                             />
-                            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                            <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={40}>
                                 {data.map((_: any, index: number) => (
-                                    <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                                    <Cell key={`cell-${index}`} fill={colors[index % colors.length]} fillOpacity={0.8} />
                                 ))}
                             </Bar>
                         </BarChart>
@@ -213,23 +218,24 @@ function ChartCard({ chart, tasks, columns, onUpdate, onRemove, colors }: any) {
                         <PieChart>
                             <Pie
                                 data={data}
-                                innerRadius={60}
-                                outerRadius={100}
-                                paddingAngle={5}
+                                innerRadius={70}
+                                outerRadius={110}
+                                paddingAngle={8}
                                 dataKey="value"
+                                stroke="none"
                             >
                                 {data.map((_: any, index: number) => (
-                                    <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                                    <Cell key={`cell-${index}`} fill={colors[index % colors.length]} fillOpacity={0.8} />
                                 ))}
                             </Pie>
                             <Tooltip
                                 content={({ active, payload }: any) => {
                                     if (active && payload && payload.length) {
                                         return (
-                                            <div className="bg-[#202020] border border-[#2f2f2f] p-3 rounded-xl shadow-2xl">
-                                                <p className="text-xs font-bold text-white mb-1">{payload[0].name}</p>
-                                                <p className="text-[11px] text-[#2383e2] font-medium">Total: {formatNumber(payload[0].value)}</p>
-                                                <p className="text-[11px] text-[#8b8b8b]">Representação: {payload[0].payload.percentage}</p>
+                                            <div className="glass-surface p-4 rounded-2xl shadow-luxury border border-white/[0.05]">
+                                                <p className="text-xs font-semibold text-white mb-2">{payload[0].name}</p>
+                                                <p className="text-sm font-bold text-white">{formatNumber(payload[0].value)}</p>
+                                                <p className="text-[10px] text-white/30 mt-1 uppercase font-bold tracking-wider">{payload[0].payload.percentage} do total</p>
                                             </div>
                                         )
                                     }
@@ -238,9 +244,9 @@ function ChartCard({ chart, tasks, columns, onUpdate, onRemove, colors }: any) {
                             />
                             <Legend
                                 verticalAlign="bottom"
-                                height={36}
+                                iconType="circle"
                                 formatter={(value: any, entry: any) => (
-                                    <span className="text-[10px] text-[#8b8b8b]">{value} ({entry.payload.percentage})</span>
+                                    <span className="text-[11px] font-medium text-white/30 mr-4 transition-luxury hover:text-white/60">{value}</span>
                                 )}
                             />
                         </PieChart>

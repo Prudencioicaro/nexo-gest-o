@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Trash2, Type, Hash, List, Calendar, CheckSquare, Users, Settings2 } from 'lucide-react'
+import { X, Trash2, Type, Hash, List, Calendar, CheckSquare, Users, Settings2, Tag, Tags } from 'lucide-react'
 import type { BoardColumn, ColumnType } from '../../types'
 
 interface ColumnSettingsModalProps {
@@ -13,6 +13,8 @@ const COLUMN_TYPES: { type: ColumnType; label: string; icon: any }[] = [
     { type: 'text', label: 'Texto', icon: Type },
     { type: 'number', label: 'Número', icon: Hash },
     { type: 'status', label: 'Status', icon: List },
+    { type: 'select', label: 'Selecionar', icon: Tag },
+    { type: 'multiselect', label: 'Seleção Múltipla', icon: Tags },
     { type: 'date', label: 'Data', icon: Calendar },
     { type: 'boolean', label: 'Checkbox', icon: CheckSquare },
     { type: 'person', label: 'Pessoas', icon: Users },
@@ -95,9 +97,9 @@ export function ColumnSettingsModal({ column, onClose, onUpdate, onDelete }: Col
                         </div>
                     )}
 
-                    {type === 'status' && (
+                    {(type === 'status' || type === 'select' || type === 'multiselect') && (
                         <div className="space-y-4 pt-2 border-t border-[#2f2f2f]">
-                            <label className="text-[10px] font-bold text-[#8b8b8b] uppercase">Opções de Status</label>
+                            <label className="text-[10px] font-bold text-[#8b8b8b] uppercase">Opções {type === 'status' ? 'de Status' : ''}</label>
                             <div className="space-y-2">
                                 {statusOptions.map((opt: any, idx: number) => (
                                     <div key={idx} className="flex items-center gap-2">

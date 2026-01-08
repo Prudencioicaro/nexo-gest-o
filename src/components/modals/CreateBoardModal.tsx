@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { useAuthStore } from '../../store/useAuthStore'
-import { useBoardStore } from '../../store/useBoardStore'
-import { X } from 'lucide-react'
+import { useBoardStore, BOARD_COLORS } from '../../store/useBoardStore'
+import { X, Check } from 'lucide-react'
 
 interface CreateBoardModalProps {
     onClose: () => void
+    onBoardCreated?: (boardId: string) => void
 }
 
-export function CreateBoardModal({ onClose }: CreateBoardModalProps) {
+export function CreateBoardModal({ onClose, onBoardCreated }: CreateBoardModalProps) {
     const [name, setName] = useState('')
+    const [selectedColor, setSelectedColor] = useState(BOARD_COLORS[0].hex)
     const [loading, setLoading] = useState(false)
     const { user } = useAuthStore()
     const { createBoard } = useBoardStore()
@@ -18,10 +20,11 @@ export function CreateBoardModal({ onClose }: CreateBoardModalProps) {
         if (!name.trim() || !user) return
 
         setLoading(true)
-        const board = await createBoard(name, user.id)
+        const board = await createBoard(name, user.id, selectedColor)
         setLoading(false)
 
         if (board) {
+            onBoardCreated?.(board.id)
             onClose()
         }
     }
@@ -48,6 +51,41 @@ export function CreateBoardModal({ onClose }: CreateBoardModalProps) {
                             onChange={(e) => setName(e.target.value)}
                             required
                         />
+                    </div>
+
+                    {/* Color Picker */}
+                    <div className="space-y-3">
+                        <label className="text-xs font-bold text-[#8b8b8b] uppercase tracking-widest">Cor do Quadro</label>
+                        <div className="flex flex-wrap gap-2">
+                            {BOARD_COLORS.map((color) => (
+                                <button
+                                    key={color.id}
+                                    type="button"
+                                    onClick={() => setSelectedColor(color.hex)}
+                                    className={`w-10 h-10 rounded-lg transition-all flex items-center justify-center ${selectedColor === color.hex
+                                            ? 'ring-2 ring-white ring-offset-2 ring-offset-[#191919] scale-110'
+                                            : 'hover:scale-105'
+                                        }`}
+                                    style={{ backgroundColor: color.hex }}
+                                    title={color.label}
+                                >
+                                    {selectedColor === color.hex && (
+                                        <Check size={18} className="text-white drop-shadow-lg" />
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Preview */}
+                    <div className="flex items-center gap-3 p-3 bg-[#202020] rounded-lg border border-[#2f2f2f]">
+                        <div
+                            className="w-4 h-4 rounded-full shrink-0"
+                            style={{ backgroundColor: selectedColor }}
+                        />
+                        <span className="text-sm text-white truncate">
+                            {name || 'Preview do quadro'}
+                        </span>
                     </div>
 
                     <div className="flex gap-4 pt-4">

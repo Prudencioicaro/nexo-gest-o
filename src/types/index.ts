@@ -4,6 +4,8 @@ export interface Board {
     id: string
     name: string
     owner_id: string
+    color?: string
+    deleted_at?: string | null
     created_at: string
     updated_at: string
 }
@@ -15,7 +17,7 @@ export interface BoardMember {
     role: BoardRole
 }
 
-export type ColumnType = 'text' | 'number' | 'status' | 'person' | 'date' | 'tag' | 'boolean'
+export type ColumnType = 'text' | 'number' | 'status' | 'person' | 'date' | 'tag' | 'boolean' | 'select' | 'multiselect'
 
 export interface BoardColumn {
     id: string

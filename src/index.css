@@ -2,132 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Google AI Dark Theme Base (HSL Converted for Tailwind) */
-  --background: 220 12% 5%;
-  /* #0b0c0e */
-  --foreground: 0 0% 89%;
-  /* #e3e3e3 */
+@layer base {
+  :root {
+    /* Deep Sophisticated Dark Theme (Linear-inspired) */
+    --background: 240 10% 3.9%;
+    /* #09090b */
+    --foreground: 0 0% 98%;
 
-  --card: 240 3% 12%;
-  /* #1e1e20 */
-  --card-foreground: 0 0% 89%;
-  --card-hover: 240 2% 17%;
-  /* #2a2a2c */
+    --card: 240 10% 6%;
+    /* #0f0f11 */
+    --card-hover: 240 10% 10%;
 
-  --popover: 220 12% 5%;
-  --popover-foreground: 0 0% 89%;
+    --primary: 217 91% 60%;
+    /* Vibrant blue #3b82f6 */
+    --primary-foreground: 0 0% 100%;
 
-  --primary: 217 89% 61%;
-  /* #4285F4 */
-  --primary-foreground: 0 0% 100%;
+    --muted: 240 5% 15%;
+    --muted-foreground: 240 5% 65%;
 
-  --secondary: 240 3% 12%;
-  --secondary-foreground: 0 0% 89%;
+    --border: 240 5% 10%;
+    /* Very subtle borders */
+    --accent: 217 91% 60% / 0.1;
 
-  --muted: 240 3% 16%;
-  --muted-foreground: 215 20% 65%;
+    --radius: 12px;
+  }
 
-  --accent: 217 89% 61%;
-  --accent-foreground: 0 0% 100%;
-
-  --destructive: 0 62% 30%;
-  --destructive-foreground: 0 0% 98%;
-
-  --border: 0 0% 19%;
-  /* #303030 */
-  --input: 0 0% 19%;
-  --ring: 217 89% 61%;
-
-  --radius: 1.5rem;
-
-  /* Custom Gradients Helper */
-  --camera-start: #4285F4;
-  --camera-middle: #9B72CB;
-  --camera-end: #D96570;
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.011em;
+    /* Tighter tracking for premium feel */
+  }
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* Custom Behaviours */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: 'Google Sans', 'Inter', -apple-system, sans-serif;
-  /* Aspiring to Google Sans */
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* Gemini Gradient Text Utility */
-.text-gradient-gemini {
-  background: linear-gradient(90deg, #4285F4 0%, #9B72CB 50%, #D96570 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  display: inline-block;
+/* Premium Motion Curves */
+.transition-luxury {
+  transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Glassmorphism Refined */
-.glass-panel {
-  background: rgba(30, 30, 32, 0.6);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius);
+/* Subtle Glows */
+.glow-primary {
+  box-shadow: 0 0 40px -10px hsla(var(--primary), 0.3);
 }
 
-.trello-list {
-  background-color: hsl(var(--secondary));
-  border-radius: 0.75rem;
-  width: 280px;
-  min-width: 280px;
-  display: flex;
-  flex-direction: column;
-  max-height: 100%;
+/* Glassmorphism Evolution */
+.glass-surface {
+  background: rgba(15, 15, 17, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-.trello-card {
-  background-color: hsl(var(--card));
-  border: 1px solid var(--border);
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  margin-bottom: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s;
+/* Sidebar Item Animation */
+.sidebar-item-active {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0) 100%);
+  box-shadow: inset 2px 0 0 hsl(var(--primary));
 }
 
-.trello-card:hover {
-  border-color: hsl(var(--primary));
-  transform: translateY(-2px);
-}
-
-.btn-primary {
-  background-color: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
-  padding: 0.5rem 1.25rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-primary:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
-}
-
-/* Scrollbar styling */
+/* Custom Scrollbar - Premium Minimalist */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -135,10 +81,38 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 10px;
+  border: 1px solid transparent;
+  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground));
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Horizontal Scroll Indicator Utility */
+.custom-scrollbar-x {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.custom-scrollbar-x::-webkit-scrollbar {
+  height: 6px;
+  display: block !important;
+}
+
+.custom-scrollbar-x::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.custom-scrollbar-x::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.custom-scrollbar-x::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  margin: 0 40px;
+  border-radius: 10px;
 }

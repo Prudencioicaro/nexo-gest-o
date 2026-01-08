@@ -7,6 +7,8 @@ import { CreateBoardModal } from './components/modals/CreateBoardModal'
 import { ShareBoardModal } from './components/modals/ShareBoardModal'
 import { LandingPage } from './pages/LandingPage'
 import { BoardViewPage } from './pages/BoardViewPage'
+import { useToast } from './components/Toast'
+import { EditableText } from './components/EditableText'
 import {
   LogOut,
   LayoutDashboard,
@@ -14,13 +16,19 @@ import {
   Hash,
   PlusCircle,
   Share2,
-  Menu
+  Menu,
+  Trash2,
+  MoreHorizontal,
+  ChevronsLeft,
+  ChevronsRight,
+  Edit2
 } from 'lucide-react'
 import type { Board } from './types'
 
 function App() {
   const { user, loading: authLoading, setUser } = useAuthStore()
-  const { boards, fetchBoards } = useBoardStore()
+  const { boards, fetchBoards, deleteBoard, updateBoard } = useBoardStore()
+  const { addToast } = useToast()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null)
@@ -28,244 +36,205 @@ function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [showLanding, setShowLanding] = useState(true)
+  const [boardMenuOpen, setBoardMenuOpen] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [editingBoardId, setEditingBoardId] = useState<string | null>(null)
 
   useEffect(() => {
     const initAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       setUser(session?.user ?? null)
-
-      // Artificial delay to show the NEXO loader
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      await new Promise(resolve => setTimeout(resolve, 2000))
       useAuthStore.setState({ loading: false })
     }
-
     initAuth()
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
     })
-
     return () => subscription.unsubscribe()
   }, [setUser])
 
   useEffect(() => {
-    if (user) {
-      fetchBoards()
-    }
+    if (user) fetchBoards()
   }, [user, fetchBoards])
+
+  const handleDeleteBoard = async (boardId: string) => {
+    if (confirmDeleteId !== boardId) {
+      setConfirmDeleteId(boardId)
+      return
+    }
+    const boardName = boards.find(b => b.id === boardId)?.name || 'Quadro'
+    setBoardMenuOpen(null)
+    setConfirmDeleteId(null)
+    if (selectedBoard?.id === boardId) setSelectedBoard(null)
+    const { error } = await deleteBoard(boardId)
+    if (error) {
+      addToast('Erro ao excluir: Tente recarregar a página', 'error')
+      return
+    }
+    addToast(`"${boardName}" excluído com sucesso`, 'success')
+  }
+
+  const handleUpdateBoardName = async (boardId: string, newName: string) => {
+    await updateBoard(boardId, { name: newName })
+    if (selectedBoard?.id === boardId) setSelectedBoard({ ...selectedBoard, name: newName })
+    addToast('Nome atualizado', 'success')
+  }
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#121212] overflow-hidden relative">
-        {/* Ambient Glow Background */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#2383e2]/5 blur-[120px] rounded-full animate-pulse" />
-
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background overflow-hidden relative">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-primary/5 blur-[120px] rounded-full animate-pulse" />
         <div className="relative z-10 flex flex-col items-center gap-8">
-          {/* Logo Animation Container */}
-          <div className="relative group">
-            {/* Outer Ring Animation */}
-            <div className="absolute inset-0 -m-4 border border-[#2383e2]/20 rounded-full animate-[spin_4s_linear_infinite]" />
-            <div className="absolute inset-0 -m-4 border-t-2 border-[#2383e2] rounded-full animate-[spin_2s_linear_infinite]" />
-
-            <div className="animate-pulse duration-[2000ms]">
-              <img
-                src="/logo.png"
-                alt="NEXO"
-                className="h-24 w-auto brightness-200 drop-shadow-[0_0_30px_rgba(35,131,226,0.3)]"
-              />
-            </div>
+          <div className="relative animate-pulse">
+            <img src="/logo.png" alt="NEXO" className="h-20 w-auto brightness-200 drop-shadow-[0_0_30px_rgba(59,130,246,0.3)]" />
           </div>
-
-          <div className="flex flex-col items-center gap-2">
-            <div className="h-1 w-48 bg-white/5 rounded-full overflow-hidden relative">
-              <div className="h-full bg-[#2383e2] animate-[progress_3s_ease-out_forwards]" />
-            </div>
-            <p className="text-[10px] font-bold text-white/20 uppercase tracking-[4px] animate-pulse">
-              Iniciando Nexo
-            </p>
+          <div className="h-1 w-48 bg-white/5 rounded-full overflow-hidden">
+            <div className="h-full bg-primary animate-[progress_2s_ease-out_forwards]" />
           </div>
         </div>
-
-        <style>{`
-          @keyframes progress {
-            0% { width: 0%; }
-            100% { width: 100%; }
-          }
-        `}</style>
+        <style>{`@keyframes progress { 0% { width: 0%; } 100% { width: 100%; } }`}</style>
       </div>
     )
   }
 
   if (!user) {
-    if (showLanding) {
-      return <LandingPage onAuth={() => setShowLanding(false)} />
-    }
-    return <AuthPage />
+    return showLanding ? <LandingPage onAuth={() => setShowLanding(false)} /> : <AuthPage />
   }
 
   return (
-    <div className="h-screen w-screen bg-[#191919] text-[#ffffff] flex overflow-hidden">
-      {/* Mobile Sidebar Overlay */}
+    <div className="h-screen w-screen bg-background text-foreground flex overflow-hidden font-sans">
       {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] lg:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] lg:hidden" onClick={() => setIsMobileMenuOpen(false)} />
       )}
 
-      <aside
-        className={`bg-[rgb(18,18,18)] flex flex-col fixed lg:relative h-screen transition-all duration-300 ease-in-out z-[101] lg:z-40 shrink-0
+      <aside className={`glass-surface flex flex-col fixed lg:relative h-screen transition-luxury z-[101] lg:z-[101] shrink-0
           ${isMobileMenuOpen ? 'translate-x-0 w-full md:w-80 lg:w-64' : '-translate-x-full lg:translate-x-0'} 
-          ${isSidebarCollapsed ? 'lg:w-0' : 'lg:w-64'}`}
-      >
-        <div className={`transition-all duration-300 flex flex-col h-full overflow-hidden border-r border-white/5 ${isSidebarCollapsed ? 'lg:opacity-0 lg:pointer-events-none' : 'opacity-100'}`}>
-          {/* Mobile Header in Sidebar */}
-          <div className="lg:hidden p-4 flex items-center justify-between border-b border-white/5">
-            <div className="flex items-center gap-2">
-              <img src="/logo.png" alt="Nexo" className="h-6 w-auto brightness-200" />
-            </div>
-            <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-white/5 rounded-lg text-white/40">
-              <Menu size={20} />
-            </button>
-          </div>
+          ${isSidebarCollapsed ? 'lg:w-0' : 'lg:w-64'}`}>
 
-          {/* Workspace Switcher */}
+        <div className={`transition-luxury flex flex-col h-full ${isSidebarCollapsed ? 'lg:opacity-0 lg:pointer-events-none' : 'opacity-100'}`}>
           <div className="p-4 mb-2">
-            <div className="flex items-center gap-3 p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all cursor-pointer group active:scale-[0.98]">
-              <div className="w-10 h-10 flex items-center justify-center">
-                <img src="/logo.png" alt="Nexo" className="w-full h-auto brightness-200 scale-110" />
+            <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition-luxury cursor-pointer group active:scale-[0.98]">
+              <div className="w-9 h-9 flex items-center justify-center bg-white/[0.05] rounded-xl border border-white/[0.05]">
+                <img src="/logo.png" alt="Nexo" className="w-6 h-auto brightness-200" />
               </div>
               <div className="flex-1 overflow-hidden">
-                <h2 className="text-[13px] font-bold text-white truncate px-1">Espaço Nexo</h2>
-                <div className="flex items-center gap-1 opacity-40 group-hover:opacity-60 transition-opacity">
-                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-[10px] font-medium">Online</span>
+                <h2 className="text-[13px] font-semibold text-white/90 truncate px-1 tracking-tight">Espaço Nexo</h2>
+                <div className="flex items-center gap-1.5 opacity-40 group-hover:opacity-60 transition-opacity">
+                  <div className="w-1 h-1 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
+                  <span className="text-[9px] font-bold uppercase tracking-wider">Online</span>
                 </div>
               </div>
+              <button onClick={(e) => { e.stopPropagation(); setIsSidebarCollapsed(true) }} className="hidden lg:flex p-1.5 hover:bg-white/5 rounded-lg text-white/40 hover:text-white transition-luxury">
+                <ChevronsLeft size={14} />
+              </button>
             </div>
           </div>
 
-          <nav className="flex-1 px-4 space-y-6 overflow-y-auto custom-scrollbar no-scrollbar py-2">
-            {/* General Section */}
+          <nav className="flex-1 px-4 space-y-6 overflow-y-auto no-scrollbar py-2">
             <div className="space-y-1">
-              <p className="px-2 pb-2 text-[10px] font-bold text-white/20 uppercase tracking-[2px]">Geral</p>
-              <button
-                onClick={() => setSelectedBoard(null)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group ${!selectedBoard ? 'bg-[#2383e2]/10 text-[#2383e2] shadow-[inset_0_0_0_1px_rgba(35,131,226,0.2)]' : 'text-white/50 hover:bg-white/5 hover:text-white'}`}
-              >
-                <LayoutDashboard size={18} className={!selectedBoard ? 'text-[#2383e2]' : 'group-hover:scale-110 transition-transform'} />
-                <span className="text-sm font-semibold">Dashboard</span>
+              <p className="px-3 pb-2 text-[9px] font-bold text-white/20 uppercase tracking-[2px]">Geral</p>
+              <button onClick={() => setSelectedBoard(null)} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-luxury group ${!selectedBoard ? 'sidebar-item-active text-white bg-white/[0.03]' : 'text-white/40 hover:bg-white/[0.03] hover:text-white/80'}`}>
+                <LayoutDashboard size={16} className={!selectedBoard ? 'text-primary' : 'group-hover:scale-110 transition-luxury'} />
+                <span className="text-[13px] font-medium tracking-tight">Dashboard</span>
               </button>
-              <div className="w-full h-px bg-white/5 my-4" />
             </div>
 
-            {/* Boards Section */}
             <div className="space-y-1">
-              <div className="flex items-center justify-between px-2 pb-2 group/title">
-                <p className="text-[10px] font-bold text-white/20 uppercase tracking-[2px]">Seus Quadros</p>
-                <button onClick={() => setShowCreateModal(true)} className="opacity-0 group-hover/title:opacity-100 hover:text-white text-white/20 transition-all">
+              <div className="px-3 pb-2 flex items-center justify-between group/title">
+                <p className="text-[9px] font-bold text-white/20 uppercase tracking-[2px]">Projetos</p>
+                <button onClick={() => setShowCreateModal(true)} className="opacity-0 group-hover/title:opacity-100 hover:text-white text-white/20 transition-luxury">
                   <PlusCircle size={14} />
                 </button>
               </div>
-
               <div className="space-y-0.5">
                 {boards.map(board => (
-                  <button
-                    key={board.id}
-                    onClick={() => setSelectedBoard(board)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all group ${selectedBoard?.id === board.id ? 'bg-white/5 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)] font-bold' : 'text-white/40 hover:bg-white/5 hover:text-white'}`}
-                  >
-                    <div className={`w-2 h-2 rounded-full transition-all ${selectedBoard?.id === board.id ? 'bg-[#2383e2] scale-125' : 'bg-white/10 group-hover:bg-white/30'}`} />
-                    <span className="text-[13px] truncate">{board.name}</span>
-                  </button>
+                  <div key={board.id} className="relative group/board">
+                    <div onClick={() => setSelectedBoard(board)} className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-lg transition-luxury group cursor-pointer ${selectedBoard?.id === board.id ? 'sidebar-item-active text-white bg-white/[0.03]' : 'text-white/40 hover:bg-white/[0.03] hover:text-white/80'}`}>
+                      <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: board.color || '#3b82f6' }} />
+                      <div className="flex-1 min-w-0">
+                        {editingBoardId === board.id ? (
+                          <EditableText value={board.name} onSave={(newName) => { handleUpdateBoardName(board.id, newName); setEditingBoardId(null); }} className="text-[13px] font-medium text-white block text-left" onCancel={() => setEditingBoardId(null)} autoEditing={true} />
+                        ) : (
+                          <span className="text-[13px] font-medium truncate block text-left tracking-tight">{board.name}</span>
+                        )}
+                      </div>
+                    </div>
+                    <button onClick={(e) => { e.stopPropagation(); setBoardMenuOpen(boardMenuOpen === board.id ? null : board.id); setConfirmDeleteId(null); }} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded opacity-0 group-hover/board:opacity-100 hover:bg-white/10 text-white/20 hover:text-white transition-luxury">
+                      <MoreHorizontal size={14} />
+                    </button>
+                    {boardMenuOpen === board.id && (
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-[#0f0f11] border border-white/[0.05] rounded-lg shadow-2xl z-[200] overflow-hidden animate-in fade-in zoom-in-95 duration-100 p-1" onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}>
+                        <button onClick={() => { setEditingBoardId(board.id); setBoardMenuOpen(null); }} className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-luxury">
+                          <Edit2 size={13} />
+                          <span>Renomear</span>
+                        </button>
+                        <div className="h-px bg-white/5 my-1" />
+                        <button onClick={() => handleDeleteBoard(board.id)} className={`w-full flex items-center gap-3 px-3 py-2 text-left text-[13px] rounded-md transition-luxury ${confirmDeleteId === board.id ? 'text-white bg-red-500/80 hover:bg-red-500' : 'text-red-400/70 hover:text-red-400 hover:bg-red-400/5'}`}>
+                          <Trash2 size={13} />
+                          <span className="font-medium">{confirmDeleteId === board.id ? 'Confirmar Exclusão' : 'Excluir Projeto'}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
           </nav>
 
-          {/* User Footer */}
-          <div className="p-4">
-            <div className="p-3 bg-white/5 rounded-2xl border border-white/5 flex items-center gap-3 group relative">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#373737] to-[#202020] border border-white/10 flex items-center justify-center text-white text-xs font-black shadow-inner">
+          <div className="p-4 mt-auto">
+            <div className="p-2 py-2.5 bg-white/[0.02] rounded-xl border border-white/5 flex items-center gap-3 group relative transition-luxury hover:bg-white/[0.05]">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-xs font-bold">
                 {user.email?.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 overflow-hidden">
-                <p className="text-xs font-bold text-white truncate">{user.email?.split('@')[0]}</p>
-                <p className="text-[9px] text-white/30 font-bold tracking-tighter uppercase truncate">{user.email}</p>
+                <p className="text-[12px] font-medium text-white/80 truncate leading-none mb-1">{user.email?.split('@')[0]}</p>
+                <p className="text-[9px] text-white/20 font-medium tracking-wide uppercase truncate leading-none">Pessoal</p>
               </div>
-              <button
-                onClick={() => useAuthStore.getState().signOut()}
-                className="opacity-0 group-hover:opacity-100 p-2 hover:bg-white/10 rounded-lg text-white/40 hover:text-red-400 transition-all"
-                title="Sair"
-              >
-                <LogOut size={16} />
+              <button onClick={() => useAuthStore.getState().signOut()} className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-500/10 rounded-lg text-white/20 hover:text-red-400 transition-luxury">
+                <LogOut size={14} />
               </button>
             </div>
           </div>
-          {/* Mobile Close Button Bottom */}
-          <button
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="lg:hidden mt-auto mx-4 mb-8 py-3 bg-[#2383e2] text-white text-xs font-bold uppercase tracking-widest rounded-xl shadow-lg shadow-[#2383e2]/20 active:scale-95 transition-all"
-          >
-            Voltar para o Projeto
-          </button>
         </div>
 
-        {/* Handle for Collapse (Desktop Only) */}
-        <div
-          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          className={`absolute top-0 right-0 w-1 h-full cursor-pointer group/handle z-50 hover:bg-[#2383e2]/40 transition-colors hidden lg:block`}
-        >
-          <button
-            className={`absolute top-12 -right-3 w-6 h-6 bg-[#121212] border border-white/10 rounded-full flex items-center justify-center shadow-xl transition-all opacity-0 group-hover/sidebar:opacity-100 hover:scale-110 active:scale-95 ${isSidebarCollapsed ? 'rotate-180 opacity-100' : ''}`}
-          >
-            <ChevronRight size={12} className="text-[#8b8b8b]" />
+        <div onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="absolute top-0 right-0 w-1 h-full cursor-pointer group/handle z-50 hover:bg-primary/40 transition-colors hidden lg:block">
+          <button className={`absolute top-12 -right-3 w-6 h-6 bg-background border border-white/10 rounded-full flex items-center justify-center shadow-xl transition-luxury opacity-0 group-hover/handle:opacity-100 hover:scale-110 ${isSidebarCollapsed ? 'rotate-180 opacity-100' : ''}`}>
+            <ChevronRight size={12} className="text-white/40" />
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-[#191919]">
-        {/* Header - Notion Style */}
-        <header className="h-12 border-b border-[#2f2f2f] px-4 flex items-center justify-between sticky top-0 bg-[#191919]/90 backdrop-blur-md z-30 shrink-0">
-          <div className="flex items-center gap-2 text-sm overflow-hidden truncate">
-            <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden p-1.5 hover:bg-[#2c2c2c] rounded text-[#8b8b8b] transition-colors"
-            >
-              <Menu size={18} />
-            </button>
+      {boardMenuOpen && (
+        <div className="fixed inset-0 z-[90]" onClick={() => { setBoardMenuOpen(null); setConfirmDeleteId(null); }} />
+      )}
+
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-background">
+        <header className="h-14 px-6 flex items-center justify-between sticky top-0 bg-background/50 backdrop-blur-xl z-30 shrink-0">
+          <div className="flex items-center gap-4 text-sm overflow-hidden truncate">
             {isSidebarCollapsed && (
-              <button
-                onClick={() => setIsSidebarCollapsed(false)}
-                className="hidden lg:block p-1.5 hover:bg-[#2c2c2c] rounded text-[#8b8b8b] transition-colors"
-              >
-                <LayoutDashboard size={16} />
+              <button onClick={() => setIsSidebarCollapsed(false)} className="p-1.5 hover:bg-white/5 rounded text-white/40 hover:text-white transition-luxury">
+                <ChevronsRight size={16} />
               </button>
             )}
-            <div className="flex items-center gap-2 text-[#8b8b8b] text-[13px]">
-              <span className="hover:text-white cursor-pointer transition-colors" onClick={() => setSelectedBoard(null)}>Dashboard</span>
+            <div className="flex items-center gap-2.5 text-white/30 text-[13px] font-medium">
+              <span className="hover:text-white/60 cursor-pointer transition-luxury" onClick={() => setSelectedBoard(null)}>Dashboard</span>
               {selectedBoard && (
                 <>
-                  <span className="opacity-30">/</span>
-                  <div className="flex items-center gap-1.5 text-white font-medium">
-                    <Hash size={14} className="opacity-50" />
-                    <span>{selectedBoard.name}</span>
+                  <ChevronRight size={12} className="opacity-20" />
+                  <div className="flex items-center gap-2 text-white">
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: selectedBoard.color || '#3b82f6' }} />
+                    <EditableText value={selectedBoard.name} onSave={(newName) => handleUpdateBoardName(selectedBoard.id, newName)} className="text-[13px] font-medium" />
                   </div>
                 </>
               )}
             </div>
           </div>
-
-          <div className="flex items-center gap-2 md:gap-4 shrink-0">
+          <div className="flex items-center gap-4">
             {selectedBoard && (
-              <button
-                onClick={() => setShowShareModal(true)}
-                className="px-2.5 py-1.5 md:px-3 md:py-1.5 bg-[#2383e2] hover:bg-[#1a5fb4] text-white text-[10px] md:text-[11px] font-bold rounded-lg transition-all flex items-center gap-1.5 md:gap-2 shadow-lg shadow-[#2383e2]/10"
-              >
-                <Share2 size={12} className="md:w-3.5 md:h-3.5" />
-                <span className="hidden xs:inline">Compartilhar</span>
-                <span className="xs:hidden">Link</span>
+              <button onClick={() => setShowShareModal(true)} className="px-4 py-1.5 bg-primary text-white text-[11px] font-bold rounded-full transition-luxury hover:brightness-110 flex items-center gap-2 shadow-glow-primary">
+                <Share2 size={12} />
+                <span>COMPARTILHAR</span>
               </button>
             )}
           </div>
@@ -275,59 +244,44 @@ function App() {
           {selectedBoard ? (
             <BoardViewPage board={selectedBoard} onBack={() => setSelectedBoard(null)} />
           ) : (
-            <div className="flex flex-col h-full bg-[#121212] overflow-y-auto custom-scrollbar p-8 lg:p-12">
-              <div className="max-w-7xl mx-auto w-full space-y-12">
-                {/* Hero Dashboard */}
-                <div className="relative p-10 rounded-2xl bg-[#1c1c1c] border border-white/5 overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-[#2383e2]/5 blur-[100px] rounded-full -mr-10 -mt-10 pointer-events-none" />
-                  <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                    <div className="text-center md:text-left">
-                      <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">Projetos</h1>
-                      <p className="text-sm text-white/40 font-medium max-w-md">
-                        Gerenciamento de fluxo de trabalho com foco e simplicidade.
+            <div className="flex flex-col h-full overflow-y-auto no-scrollbar p-6 lg:p-10">
+              <div className="max-w-6xl mx-auto w-full space-y-16 py-8">
+                <div className="relative p-12 rounded-[32px] bg-gradient-to-br from-white/[0.03] to-transparent border border-white/[0.05] overflow-hidden group/hero">
+                  <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 blur-[120px] rounded-full -mr-32 -mt-32 pointer-events-none group-hover/hero:bg-primary/10 transition-luxury duration-1000" />
+                  <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+                    <div className="text-center md:text-left space-y-4">
+                      <h1 className="text-4xl md:text-6xl font-semibold text-white tracking-tight leading-none">Projetos</h1>
+                      <p className="text-base md:text-lg text-white/40 font-medium max-w-sm leading-relaxed">
+                        Gerencie seus fluxos de trabalho com clareza e elegância.
                       </p>
                     </div>
-                    <button
-                      onClick={() => setShowCreateModal(true)}
-                      className="px-6 py-3 bg-white text-black hover:bg-white/90 rounded-xl font-bold text-xs flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-xl shrink-0"
-                    >
+                    <button onClick={() => setShowCreateModal(true)} className="px-8 py-4 bg-white text-black hover:bg-[#f0f0f0] rounded-full font-bold text-xs flex items-center gap-2.5 transition-luxury active:scale-[0.98] shadow-2xl shrink-0">
                       <PlusCircle size={16} />
-                      NOVO QUADRO
+                      CRIAR NOVO PROJETO
                     </button>
                   </div>
                 </div>
 
-                {/* Boards Grid */}
-                <div className="space-y-6">
+                <div className="space-y-8">
                   <div className="flex items-center justify-between px-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-1.5 h-6 bg-[#2383e2] rounded-full" />
-                      <h3 className="text-xl font-bold text-white">Espaço de Trabalho</h3>
-                    </div>
-                    <span className="text-sm font-bold text-white/20 uppercase tracking-widest leading-none">{boards.length} Boards</span>
+                    <h3 className="text-xl font-semibold text-white/90 tracking-tight">Seus Projetos</h3>
+                    <span className="text-[10px] font-bold text-white/20 uppercase tracking-[2px]">{boards.length} TOTAL</span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {boards.map((board, idx) => (
-                      <div
-                        key={board.id}
-                        onClick={() => setSelectedBoard(board)}
-                        className="group relative bg-[#1c1c1c] border border-white/5 rounded-2xl p-6 cursor-pointer transition-all hover:border-white/10 hover:bg-[#202020] animate-in fade-in slide-in-from-bottom-2 duration-500"
-                        style={{ animationDelay: `${idx * 50}ms` }}
-                      >
-                        <div className="flex items-start justify-between mb-6">
-                          <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-white/40 transition-colors group-hover:text-[#2383e2]">
-                            <Hash size={20} />
+                      <div key={board.id} onClick={() => setSelectedBoard(board)} className="group relative bg-[#0f0f11] border border-white/[0.04] rounded-[24px] p-7 cursor-pointer transition-luxury hover:bg-[#141416] hover:border-white/[0.1] hover:-translate-y-1" style={{ transitionDelay: `${idx * 20}ms` }}>
+                        <div className="flex items-start justify-between mb-8">
+                          <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-luxury border border-white/[0.03]" style={{ backgroundColor: `${board.color || '#3b82f6'}10` }}>
+                            <Hash size={24} style={{ color: board.color || '#3b82f6' }} />
                           </div>
-                          <ChevronRight size={18} className="text-white/10 group-hover:text-white/30 transition-colors" />
+                          <ChevronRight size={18} className="text-white/10 group-hover:text-white/40 transition-luxury" />
                         </div>
-
-                        <h4 className="text-lg font-bold text-white mb-1">{board.name}</h4>
-                        <p className="text-[11px] text-white/20 font-bold uppercase tracking-wider mb-6">Criado em {new Date(board.created_at).toLocaleDateString('pt-BR')}</p>
-
-                        <div className="flex items-center -space-x-1.5 opacity-40">
-                          <div className="w-6 h-6 rounded-lg bg-[#2383e2] border-2 border-[#1c1c1c] flex items-center justify-center text-[8px] font-black text-white">U</div>
-                          <div className="w-6 h-6 rounded-lg bg-[#2c2c2c] border-2 border-[#1c1c1c] flex items-center justify-center text-[8px] font-black text-white/40">+</div>
+                        <h4 className="text-xl font-semibold text-white/90 mb-1.5 tracking-tight group-hover:text-primary transition-luxury">{board.name}</h4>
+                        <p className="text-[11px] text-white/20 font-bold uppercase tracking-widest mb-8">Personalizado</p>
+                        <div className="flex items-center justify-between">
+                          <div className="w-8 h-8 rounded-lg bg-primary/20 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">U</div>
+                          <div className="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]" style={{ color: board.color || '#3b82f6', backgroundColor: 'currentColor' }} />
                         </div>
                       </div>
                     ))}
@@ -340,7 +294,10 @@ function App() {
       </div>
 
       {showCreateModal && (
-        <CreateBoardModal onClose={() => setShowCreateModal(false)} />
+        <CreateBoardModal onClose={() => setShowCreateModal(false)} onBoardCreated={(boardId) => {
+          const newBoard = boards.find(b => b.id === boardId)
+          if (newBoard) setSelectedBoard(newBoard)
+        }} />
       )}
       {showShareModal && selectedBoard && (
         <ShareBoardModal board={selectedBoard} onClose={() => setShowShareModal(false)} />

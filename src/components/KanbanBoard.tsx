@@ -12,7 +12,7 @@ import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Task, BoardColumn } from '../types'
-import { FileText, Plus, MoreHorizontal, ChevronRight } from 'lucide-react'
+import { FileText, Plus, MoreHorizontal, ChevronRight, Hash } from 'lucide-react'
 
 interface KanbanBoardProps {
     tasks: Task[]
@@ -114,7 +114,7 @@ export function KanbanBoard({ tasks, columns, onTaskUpdate, onTaskClick, onCreat
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex gap-8 p-4 md:p-12 h-fit min-h-full items-start overflow-x-auto custom-scrollbar bg-[#121212]">
+            <div className="flex gap-10 p-6 md:p-14 h-fit min-h-full items-start overflow-x-auto no-scrollbar bg-transparent">
                 {kanbanColumns.map((col: any) => (
                     <KanbanColumn
                         key={col.id}
@@ -132,9 +132,12 @@ export function KanbanBoard({ tasks, columns, onTaskUpdate, onTaskClick, onCreat
 
             <DragOverlay dropAnimation={null}>
                 {activeTask ? (
-                    <div className="w-80 p-5 bg-[#1c1c1c] border border-white/5 rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.6)] rotate-[2deg] cursor-grabbing backdrop-blur-xl scale-105 transition-transform duration-200">
-                        <div className="w-8 h-1 bg-[#2383e2] rounded-full mb-4" />
-                        <p className="text-[14px] font-bold text-white leading-relaxed">{activeTask.data_json?.[columns[0]?.id] || 'Tarefa sem título'}</p>
+                    <div className="w-80 p-5 glass-surface rounded-2xl shadow-luxury rotate-[2deg] cursor-grabbing scale-105 transition-luxury">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Hash size={12} className="text-primary" />
+                            <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Movendo</span>
+                        </div>
+                        <p className="text-[14px] font-medium text-white/90 leading-relaxed">{activeTask.data_json?.[columns[0]?.id] || 'Tarefa sem título'}</p>
                     </div>
                 ) : null}
             </DragOverlay>
@@ -157,42 +160,42 @@ function KanbanColumn({ id, label, color, tasks, onTaskClick, onCreateTask, colu
     const { setNodeRef } = useSortable({ id })
 
     const NOTION_COLORS: Record<string, { bg: string, text: string }> = {
-        'Default': { bg: '#373737', text: '#ffffff' },
-        'Gray': { bg: '#454b4e', text: '#9b9b9b' },
-        'Blue': { bg: '#3a4a59', text: '#5e87c9' },
-        'Green': { bg: '#3a5948', text: '#529e72' },
-        'Yellow': { bg: '#59543a', text: '#c29243' },
-        'Orange': { bg: '#594a3a', text: '#cc7d24' },
-        'Red': { bg: '#593a3a', text: '#df5452' },
-        'Purple': { bg: '#4a3a59', text: '#9d68d3' },
-        'Pink': { bg: '#593a4a', text: '#d15796' },
+        'Default': { bg: 'rgba(255,255,255,0.05)', text: 'rgba(255,255,255,0.6)' },
+        'Gray': { bg: 'rgba(255,255,255,0.1)', text: 'rgba(255,255,255,0.7)' },
+        'Blue': { bg: 'rgba(59,130,246,0.15)', text: '#60a5fa' },
+        'Green': { bg: 'rgba(34,197,94,0.15)', text: '#4ade80' },
+        'Yellow': { bg: 'rgba(234,179,8,0.15)', text: '#facc15' },
+        'Orange': { bg: 'rgba(249,115,22,0.15)', text: '#fb923c' },
+        'Red': { bg: 'rgba(239,68,68,0.15)', text: '#f87171' },
+        'Purple': { bg: 'rgba(168,85,247,0.15)', text: '#c084fc' },
+        'Pink': { bg: 'rgba(236,72,153,0.15)', text: '#f472b6' },
     }
 
     const colorStyles = NOTION_COLORS[color] || NOTION_COLORS['Default']
 
     return (
-        <div ref={setNodeRef} className="w-80 shrink-0 flex flex-col gap-5 group/column">
-            <div className="flex items-center justify-between px-3 text-[#8b8b8b]">
-                <div className="flex items-center gap-3 overflow-hidden">
-                    <div
-                        className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[2px] shadow-sm border border-black/20"
+        <div ref={setNodeRef} className="w-80 shrink-0 flex flex-col gap-6 group/column transition-luxury">
+            <div className="flex items-center justify-between px-2">
+                <div className="flex items-center gap-3">
+                    <span
+                        className="px-2.5 py-1 rounded-md text-[11px] font-semibold tracking-tight border border-white/[0.03]"
                         style={{ backgroundColor: colorStyles.bg, color: colorStyles.text }}
                     >
                         {label}
-                    </div>
-                    <span className="text-xs font-black text-white/20">{tasks.length}</span>
+                    </span>
+                    <span className="text-[11px] font-bold text-white/20">{tasks.length}</span>
                 </div>
-                <div className="flex items-center gap-3 opacity-0 group-hover/column:opacity-100 transition-all duration-300">
-                    <button onClick={() => onCreateTask()} className="p-1.5 hover:bg-white/5 rounded-lg text-white/30 hover:text-white transition-all">
-                        <Plus size={16} />
+                <div className="flex items-center gap-1 opacity-0 group-hover/column:opacity-100 transition-luxury">
+                    <button onClick={() => onCreateTask()} className="p-1.5 hover:bg-white/5 rounded-lg text-white/30 hover:text-white transition-luxury">
+                        <Plus size={14} />
                     </button>
-                    <button className="p-1.5 hover:bg-white/5 rounded-lg text-white/30 hover:text-white transition-all">
-                        <MoreHorizontal size={16} />
+                    <button className="p-1.5 hover:bg-white/5 rounded-lg text-white/30 hover:text-white transition-luxury">
+                        <MoreHorizontal size={14} />
                     </button>
                 </div>
             </div>
 
-            <div className={`flex-1 space-y-3 min-h-[500px] p-2 rounded-2xl transition-all duration-300 ${isOver ? 'bg-white/[0.01] ring-1 ring-inset ring-white/5' : ''}`}>
+            <div className={`flex-1 space-y-3 min-h-[500px] transition-luxury rounded-2xl ${isOver ? 'bg-white/[0.02] shadow-inner' : ''}`}>
                 {tasks.map((task, idx) => (
                     <SortableTaskCard
                         key={task.id}
@@ -203,17 +206,16 @@ function KanbanColumn({ id, label, color, tasks, onTaskClick, onCreateTask, colu
                     />
                 ))}
 
-                {/* Drop Indicator (Shadow like Trello) */}
                 {isOver && (
-                    <div className="w-full h-24 bg-white/[0.02] border-2 border-dashed border-white/5 rounded-2xl animate-pulse" />
+                    <div className="w-full h-24 bg-white/[0.01] border border-dashed border-white/5 rounded-[20px] animate-pulse" />
                 )}
 
                 <button
                     onClick={() => onCreateTask()}
-                    className="w-full flex items-center justify-center gap-2 py-3 text-white/20 hover:text-white/60 hover:bg-white/5 rounded-xl transition-all text-[11px] font-bold uppercase tracking-widest group/btn border border-white/5 shadow-sm"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-white/10 hover:text-white/40 hover:bg-white/[0.02] rounded-xl transition-luxury text-[13px] font-medium group/btn"
                 >
-                    <Plus size={14} />
-                    <span>Novo Card</span>
+                    <Plus size={14} className="group-hover/btn:scale-125 transition-luxury" />
+                    <span>Adicionar item</span>
                 </button>
             </div>
         </div>
@@ -245,57 +247,48 @@ function SortableTaskCard({ task, onClick, columns, index }: { task: Task; onCli
             ref={setNodeRef}
             {...attributes}
             {...listeners}
-            className={`group/card p-4 bg-[#1c1c1c] border border-white/5 rounded-xl shadow-sm hover:border-white/20 hover:bg-[#202020] transition-all duration-200 animate-in fade-in slide-in-from-top-1 ease-out overflow-hidden relative cursor-grab active:cursor-grabbing touch-none`}
-            style={{ ...style, animationDelay: `${index * 50}ms` }}
+            onClick={(e) => { e.stopPropagation(); onClick(); }}
+            className="group/card p-5 bg-[#0f0f11] border border-white/[0.04] rounded-[20px] shadow-sm hover:border-white/[0.1] hover:bg-[#141416] transition-luxury animate-in fade-in slide-in-from-top-1 ease-out overflow-hidden relative cursor-pointer touch-none"
+            style={{ ...style, animationDelay: `${index * 30}ms` }}
         >
-            <div className="flex-1 min-w-0" onClick={(e) => {
-                // Prevent click if it was a drag gesture
-                if (!isDragging) {
-                    onClick();
-                }
-            }}>
-                <div className="flex items-center gap-2 mb-2 opacity-30">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#2383e2]" />
-                    <span className="text-[9px] font-bold uppercase tracking-widest">Tarefa</span>
-                </div>
+            <div className="flex items-center gap-2 mb-4 opacity-20 group-hover/card:opacity-40 transition-luxury">
+                <Hash size={10} className="text-primary" />
+                <span className="text-[9px] font-bold uppercase tracking-widest leading-none">Contexto</span>
+            </div>
 
-                <p className="text-[13px] font-bold text-white leading-relaxed mb-4">
-                    {task.data_json?.[columns[0]?.id] || 'Tarefa sem título'}
-                </p>
+            <p className="text-[14px] font-medium text-white/90 leading-relaxed mb-6 group-hover:text-white transition-luxury">
+                {task.data_json?.[columns[0]?.id] || 'Sem título'}
+            </p>
 
-                <div className="space-y-3">
-                    {checklist.length > 0 && (
-                        <div className="space-y-1.5 pointer-events-none">
-                            <div className="flex items-center justify-between text-[9px] text-white/20 font-bold uppercase tracking-widest">
-                                <span>{progress}%</span>
+            <div className="space-y-4">
+                {checklist.length > 0 && (
+                    <div className="space-y-2 pointer-events-none">
+                        <div className="h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div
+                                className={`h-full transition-all duration-700 ease-in-out ${progress === 100 ? 'bg-green-500' : 'bg-primary'}`}
+                                style={{ width: `${progress}%` }}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex items-center justify-between pointer-events-none">
+                    <div className="flex items-center gap-3">
+                        {task.data_json?.attachments?.length > 0 && (
+                            <div className="flex items-center gap-1.5 text-[10px] text-white/20 font-medium">
+                                <FileText size={10} />
+                                <span>{task.data_json.attachments.length}</span>
                             </div>
-                            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                                <div
-                                    className={`h-full transition-all duration-500 ease-out ${progress === 100 ? 'bg-[#529e72]' : 'bg-[#2383e2]'}`}
-                                    style={{ width: `${progress}%` }}
-                                />
+                        )}
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        {task.data_json?.person && (
+                            <div className="w-6 h-6 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
+                                {task.data_json.person.charAt(0).toUpperCase()}
                             </div>
-                        </div>
-                    )}
-
-                    <div className="flex items-center justify-between pointer-events-none">
-                        <div className="flex items-center gap-2">
-                            {task.data_json?.attachments?.length > 0 && (
-                                <div className="flex items-center gap-1.5 text-[9px] text-white/30 font-bold">
-                                    <FileText size={10} />
-                                    <span>{task.data_json.attachments.length}</span>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            {task.data_json?.person && (
-                                <div className="w-5 h-5 rounded bg-white/5 border border-white/5 flex items-center justify-center text-[8px] font-bold text-white/40 uppercase">
-                                    {task.data_json.person.charAt(0)}
-                                </div>
-                            )}
-                            <ChevronRight size={14} className="text-white/5 group-hover/card:text-white/20 transition-colors" />
-                        </div>
+                        )}
+                        <ChevronRight size={14} className="text-white/5 group-hover/card:translate-x-0.5 group-hover/card:text-white/20 transition-luxury" />
                     </div>
                 </div>
             </div>

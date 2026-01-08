@@ -14,9 +14,10 @@ interface BoardDetailState {
     fetchMembers: (boardId: string) => Promise<void>
     inviteMember: (boardId: string, email: string) => Promise<void>
     removeMember: (memberId: string) => Promise<void>
-    addColumn: (boardId: string, name: string, type: any) => Promise<void>
+    addColumn: (boardId: string, name: string, type: any, customOptions?: any) => Promise<void>
     updateColumn: (columnId: string, updates: Partial<BoardColumn>) => Promise<void>
     deleteColumn: (columnId: string) => Promise<void>
+    reorderColumn: (columnId: string, newPosition: number) => Promise<void>
     addTask: (boardId: string, data: Record<string, any>) => Promise<string | null>
     updateTask: (taskId: string, data: Record<string, any>) => Promise<void>
     deleteTask: (taskId: string) => Promise<void>
@@ -93,17 +94,18 @@ export const useBoardDetailStore = create<BoardDetailState>((set, get) => ({
         }
     },
 
-    addColumn: async (boardId, name, type) => {
+    addColumn: async (boardId, name, type, customOptions) => {
         const newPos = get().columns.length
-        let options = {}
-        if (type === 'status') {
+        let options = customOptions || {}
+
+        // Se não há opções customizadas e é um tipo que precisa de opções, usar padrão
+        if (!customOptions && (type === 'status' || type === 'select' || type === 'multiselect')) {
             options = {
                 options: [
                     { id: 'backlog', label: 'Backlog', color: 'Gray' },
                     { id: 'todo', label: 'A Fazer', color: 'Blue' },
                     { id: 'in_progress', label: 'Em Andamento', color: 'Yellow' },
                     { id: 'done', label: 'Concluído', color: 'Green' },
-                    { id: 'blocked', label: 'Bloqueado', color: 'Red' },
                 ]
             }
         }
@@ -133,6 +135,32 @@ export const useBoardDetailStore = create<BoardDetailState>((set, get) => ({
         if (error) {
             set({ columns: oldColumns })
             console.error('Erro ao atualizar coluna:', error)
+        }
+    },
+
+    reorderColumn: async (columnId, newPosition) => {
+        const oldColumns = get().columns
+        const columnIndex = oldColumns.findIndex(c => c.id === columnId)
+        if (columnIndex === -1) return
+
+        // Create new ordered array
+        const reorderedColumns = [...oldColumns]
+        const [moved] = reorderedColumns.splice(columnIndex, 1)
+        reorderedColumns.splice(newPosition, 0, moved)
+
+        // Update positions
+        const updatedColumns = reorderedColumns.map((col, idx) => ({ ...col, position: idx }))
+        set({ columns: updatedColumns })
+
+        // Batch update positions in database
+        try {
+            const updates = updatedColumns.map(col =>
+                supabase.from('board_columns').update({ position: col.position }).eq('id', col.id)
+            )
+            await Promise.all(updates)
+        } catch (error) {
+            set({ columns: oldColumns })
+            console.error('Erro ao reordenar colunas:', error)
         }
     },
 
